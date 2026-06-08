@@ -540,3 +540,11 @@ def test_user_token_removal_is_explicitly_irreversible():
     migration = _load_migration("20260824_1031_a6c2120d5b2b_drop_user_token.py")
     with pytest.raises(RuntimeError, match="irreversible"):
         migration.downgrade()
+
+
+def test_migrations_have_a_single_head():
+    """Every migration chain ends in one head, so ``alembic upgrade head`` works."""
+    from alembic.script import ScriptDirectory
+
+    script = ScriptDirectory(str(VERSIONS_DIR.parent))
+    assert len(script.get_heads()) == 1
