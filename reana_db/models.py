@@ -174,6 +174,11 @@ class User(Base, Timestamp, QuotaBase):
     username = Column(String(length=255))
     idp_issuer = Column(String(length=255))
     idp_subject = Column(String(length=255))
+    gitlab_webhook_secret = Column(
+        EncryptedType(String(length=255), _secret_key, AesEngine, "pkcs5"),
+        unique=True,
+    )
+    """Per-user secret used to authenticate incoming GitLab webhooks."""
     tokens = relationship("UserToken", backref="user_")
     workflows = relationship("Workflow", backref="owner")
     workflows_shared_with_me = relationship(
@@ -498,6 +503,10 @@ class InteractiveSession(Base, Timestamp, QuotaBase):
         nullable=False,
         default=InteractiveSessionType.jupyter,
     )
+    session_secret = Column(
+        EncryptedType(String(length=255), _secret_key, AesEngine, "pkcs5"),
+    )
+    """Random per-session secret used as the notebook access token."""
 
     __table_args__ = (
         UniqueConstraint("name", "path"),
