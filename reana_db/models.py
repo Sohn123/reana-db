@@ -163,12 +163,17 @@ class User(Base, Timestamp, QuotaBase):
     """User table."""
 
     __tablename__ = "user_"
-    __table_args__ = {"schema": "__reana"}
+    __table_args__ = (
+        UniqueConstraint("idp_issuer", "idp_subject", name="uq_user__idp_identity"),
+        {"schema": "__reana"},
+    )
 
     id_ = Column(UUIDType, primary_key=True, unique=True, default=generate_uuid)
     email = Column(String(length=255), unique=True, primary_key=True)
     full_name = Column(String(length=255))
     username = Column(String(length=255))
+    idp_issuer = Column(String(length=255))
+    idp_subject = Column(String(length=255))
     tokens = relationship("UserToken", backref="user_")
     workflows = relationship("Workflow", backref="owner")
     workflows_shared_with_me = relationship(
